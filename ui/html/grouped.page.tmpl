@@ -1,0 +1,31 @@
+{{template "base" .}}
+{{define "title"}}Group {{.Group.Name}}{{end}}
+{{define "body"}}
+   
+
+  <div class="group_wrapper">
+        <button class="title-group-button">{{.Group.Name}}</button>
+        <p>
+            {{if .Contacts}}
+        <table class="table table-striped">
+            {{range .Contacts}}
+              <tr>
+              <tbody>
+              <td>{{.ID}}</td> 
+              <td scope="row"><a style="color: dodgerblue;" href="/contact/{{.ID}}" title="{{.Name}}, -click Contact to view">{{.Name}}</a></td>
+              <td>{{.Mobile}}</td>
+              <td></td>
+              <td><a class="btn btn-warning" href="/contact/del/usergroup/{{.ID}}" title="Remove Contact from Group"><i class="far fa-window-close"></i></a></td>
+              </tr>
+            {{end}}
+          </tbody>
+          {{end}}
+        </table>
+     <p class="group-action">
+        <a class="btn btn-danger" href="/contact/del/group/{{.Group.ID}}"><i class="fas fa-trash"> Delete Group</i> </a>
+        <button class="btn btn-info"><i class="fas fa-sms"> Send Message</i></button>
+      </p>
+     
+        </p>
+      </div>
+{{end}}

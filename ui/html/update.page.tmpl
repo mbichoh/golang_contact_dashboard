@@ -1,0 +1,28 @@
+{{template "base" .}}
+{{define "title" }}Update #{{.Contact.ID}}{{end}}
+{{define "body" }}
+    <div class="modal-content divform">
+        <div class="modal-header info-color white-text">
+            <h4 class="title">Contact form</h4>
+        </div>
+ <form  method='Post' action='/contact/update/{{.Contact.ID}}'>
+
+        <div class="modal-body">
+
+        <input type="hidden" name="up_id" class="form-control form-control-sm" value='{{.Contact.ID}}'>
+            <label><i class="fas fa-user"></i> Name</label>
+            
+            <input type="text" name="up_name" class="form-control form-control-sm" value='{{.Contact.Name}}' required>
+            <br>
+            <label><i class="fas fa-phone"></i> Phone Number</label>
+            
+            <input type="text" name="up_contact" class="form-control form-control-sm" value='{{.Contact.Mobile}}' maxlength="10" required>
+            <br>
+            <div class="text-center mt-4 mb-2">
+                <input class="btn btn-warning" type='submit' value='Update Contact'>
+            </div>
+        </div>
+    
+    </form>
+    </div>
+{{end}}

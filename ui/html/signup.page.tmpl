@@ -1,0 +1,30 @@
+{{template "base" .}}
+{{define "title"}}Signup{{end}}
+{{define "body"}}
+    <div class="form-login">
+<form class="text-center border border-light p-5" action='/user/signup' method='POST' novalidate>
+{{with .Form}}
+    <p class="h4">Sign up</p>
+    {{with .Errors.Get "name"}}
+        <label class='error'>*{{.}}</label>
+    {{end}}
+    <input type="text" class="form-control" name='name' placeholder="Full name" value='{{.Get "name"}}'>
+    <br>
+    {{with .Errors.Get "mobile"}}
+         <label class='error'>*{{.}}</label>
+    {{end}}
+    <input type="mobile"  class="form-control" name='mobile' placeholder="Phone Number" value='{{.Get "mobile"}}'>
+    <br>
+    {{with .Errors.Get "password"}}
+          <label class='error'>*{{.}}</label>
+    {{end}}
+    <input type="password" class="form-control" name='password' placeholder="Password">
+	<br>
+    <input class="btn btn-info my-4 btn-block" type="submit" value="Sign Up">
+	<p>A member ?
+        <a href="/user/login">Login</a>
+    </p>
+{{end}}
+</form>
+</div>
+{{end}}

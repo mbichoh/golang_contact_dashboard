@@ -1,0 +1,13 @@
+{{define "success"}}
+    <div class="alert alert-success al">
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+    <strong>Data inserted successfully!...</strong>
+    </div>
+{{end}}
+
+{{define "error"}}
+    <div class="alert alert-danger al">
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+    <strong>{{template "err" .}}</strong>
+    </div>
+{{end}}

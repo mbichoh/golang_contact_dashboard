@@ -1,0 +1,31 @@
+{{template "base" .}}
+{{define "title"}}Contact #{{.Contact.ID}}{{end}}
+{{define "body"}}
+    {{with .Contact}}
+	<div class="tablee">
+		<table class="table table-hover">
+		  <thead>
+		    <tr>
+		      <th scope="col">#</th>
+		      <th scope="col">Name</th>
+		      <th scope="col">Number</th>
+		      <th scope="col">Action</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <tr>
+		      <th scope="row">{{.ID}}</th>
+		      <td>{{.Name}}</td>
+		      <td>{{.Mobile}}</td>
+		      <td class="action">
+	      	
+				<a class="btn btn-warning" href='/contact/update/{{.ID}}'><i class="fas fa-edit"></i></a>
+				<a href='/contact/del/{{.ID}}' class="btn btn-danger"><i class="fas fa-trash"></i></a>
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalConfirmDelete"><i class="fas fa-sms"></i></button>
+		      </td>
+		    </tr>
+		  </tbody>
+		</table>
+	</div>
+{{end}}
+{{end}}

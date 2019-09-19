@@ -1,0 +1,24 @@
+{{template "base" .}}
+{{define "title"}}Login {{end}}
+{{define "body"}}
+<div class="form-login">
+<form class="text-center border border-light p-5" action='/user/login' method='POST' novalidate>
+{{with .Form}}
+    {{with .Errors.Get "generic"}}
+        <div class="alert alert-danger">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+        <strong>{{.}}</strong>
+        </div>
+    {{end}}
+    <p class="h4">Sign in</p>
+    <input type="text" name="mobile" class="form-control" placeholder="Phone Number" value="{{.Get "mobile"}}">
+    <br>
+    <input type="password" name="password" class="form-control" placeholder="Password">
+    <input class="btn btn-info btn-block my-4" type="submit" value="Login">
+    <p>Not a member?
+        <a href="/user/signup">Register</a>
+    </p>
+{{end}}
+</form>
+</div>
+{{end}}

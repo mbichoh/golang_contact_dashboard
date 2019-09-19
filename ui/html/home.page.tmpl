@@ -1,0 +1,66 @@
+{{template "base" .}}
+{{define "title"}}Contacts{{end}}
+{{define "body"}}
+
+<div class="tabwrapper">
+<div class="tab">
+  <button class="tablinks" onclick="openCity(event, 'London')">All Contacts</button>
+  <button class="tablinks" onclick="openCity(event, 'Paris')">Grouped Contact</button>
+</div>
+<div id="London" class="tabcontent">
+  <p>
+	{{if .Contacts}}
+    	<table class="table table-striped">
+		  <thead>
+		    <tr>
+		      <th>Name</th>
+		      <th>Number</th>
+		      <th></th>
+		      <th>#</th>
+		    </tr>
+		  </thead>
+		  {{range .Contacts}}
+		  <tbody>
+		    <tr>
+		      <td scope="row"><a style="color: dodgerblue;" href="/contact/{{.ID}}" title="{{.Name}}, -click Contact to view">{{.Name}}</a></td>
+		      <td>{{.Mobile}}</td>
+		      <td></td>
+		      <td>{{.ID}}</td>
+		    </tr>
+		  </tbody>
+		  {{end}}
+		</table>
+		{{else}}
+		<p>There is nothing to display....</p>
+		{{end}}
+  </p>
+  </div>
+  <div id="Paris" class="tabcontent">
+	<p>
+			{{if .Groups}}
+			<table class="table table-striped">
+			  <thead>
+				<tr>
+				  <th>Name</th>
+				  <th></th>
+				  <th>#</th>
+				</tr>
+			  </thead>
+			  {{range .Groups}}
+			  <tbody>
+				<tr>
+				  <td scope="row"><a style="color: dodgerblue;" href="/contact/group/{{.ID}}" title="-click Group to view">{{.Name}}</a></td>
+				  <td></td>
+				  <td>{{.ID}}</td>
+				</tr>
+			  </tbody>
+			  {{end}}
+			</table>
+			{{else}}
+			<p>There is nothing to display....</p>
+			{{end}}
+	</p>
+  </div>
+</div>
+    
+{{end}}

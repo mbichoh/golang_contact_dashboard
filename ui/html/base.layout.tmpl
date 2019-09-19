@@ -1,0 +1,44 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{template "title" .}} -Dashboard</title>
+ 
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/static/css/bootstrap/bootstrap.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/styless.css">
+  <link rel="stylesheet" type="text/css" href="/static/fontwebawesome/fontawesome-free-5.7.1-web/css/all.min.css">
+  
+</head>
+<body>
+    {{if .AuthenticatedUser}}
+        <form class='loggi' method='POST' action='/user/logout'>
+                
+               Welcome ({{.AuthenticatedUser.Name}})  <button> Logout </button>
+        </form>
+    {{else}}
+        <form class='loggi' method='Get' action='/user/login'>
+                    <button> Login </button>
+        </form>
+    {{end}}
+	<div class="title-heaad">
+        {{if .AuthenticatedUser}}
+            <a href="/" class="a1">Contacts</a>
+            <a href="/contact/create" class="a2">Add Contact</a>
+            <a href="/contact/group" class="a2">Group Contacts</a>
+        {{else}}
+            <a href="#" class="a1">Contacts</a>
+        {{end}}
+	</div>
+    {{with .Flash}}
+      <p>  <div class="alert alert-success al">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+        <strong>{{.}}</strong>
+        </div> </p>
+    {{end}}
+{{template "body" .}}
+<script src="/static/js/jquery-3.4.1.min.js"></script>
+<script src="/static/js/styless.js"></script>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,50 @@
+{{template "base" .}}
+{{define "title"}}Group{{end}}
+{{define "body"}}
+    <div class="table-responsive tablee">
+	<div class="modal-content">
+	
+	{{if .Contacts}}
+	
+    	<table class="table table-striped">
+		  <thead>
+		    <tr>
+              <th>Check</th>
+		      <th>Name</th>
+		      <th>Number</th>
+		      <th></th>
+		      <th>#</th>
+		    </tr>
+		  </thead>
+		  {{range .Contacts}}
+		  <tbody>
+		    <tr>
+                <td>
+                        <input type='checkbox' value="{{.ID}}">
+                </td>
+		      <td scope="row"><a style="color: dodgerblue;" href="/contact/{{.ID}}" title="{{.Name}}, -click Contact to view">{{.Name}}</a></td>
+		      <td>{{.Mobile}}</td>
+		      <td></td>
+		      <td>{{.ID}}</td>
+		    </tr>
+		  </tbody>
+  		  
+
+		  {{end}}
+		  
+		</table>
+		{{else}}
+		<p>There is nothing to display....</p>
+		{{end}}
+				<div  class=' row col-sm-8'>
+				<div class="col-sm-6">
+					<input type='text' id="groupname" class="form-control" placeholder='Enter group name here...'>
+				</div>
+				<div class='col-sm-4'>
+				<input class='btn btn-primary' id="submitBtn" type="submit" value='Group Contacts'>
+				</div>
+				</div>
+				<p></p>
+	</div>
+	</div>
+{{end}}

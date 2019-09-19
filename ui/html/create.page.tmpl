@@ -1,0 +1,31 @@
+{{template "base" .}}
+{{define "title"}}Create{{end}}
+{{define "body"}}
+    <div class="modal-content divform">
+        <div class="modal-header info-color white-text">
+            <h4 class="title">Contact form</h4>
+        </div>
+        
+ <form action='/contact/create' method='POST' novalidate>
+ {{with .Form}}
+        <div class="modal-body">    
+            <label><i class="fas fa-user"></i> Name</label><br>
+            {{with .Errors.Get "name"}}
+                <label class='error'>*{{.}}</label>
+            {{end}}
+            <input type="text" name="name" class="form-control form-control-sm" value='{{.Get "name"}}'>
+            <br>
+            <label><i class="fas fa-phone"></i> Phone Number</label><br>
+            {{with .Errors.Get "mobile"}}
+                <label class='error'>*{{.}}</label>
+            {{end}}
+            <input type="text" name="mobile" class="form-control form-control-sm" maxlength="10" value={{.Get "mobile"}}>
+            <br>
+            <div class="text-center mt-4 mb-2">
+                <input class="btn btn-info" type='submit' value='Add Contact'>
+            </div>
+        </div>
+{{end}}
+    </form>
+    </div>
+{{end}}
