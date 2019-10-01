@@ -51,3 +51,11 @@ function openCity(evt, cityName) {
       window.location.href="/contact/group/"+data
     })
   })
+
+  // Get the modal
+var modal = document.getElementById('msgModal');
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}

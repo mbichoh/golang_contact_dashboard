@@ -19,7 +19,7 @@
             {{with .Errors.Get "mobile"}}
                 <label class='error'>*{{.}}</label>
             {{end}}
-            <input type="text" name="mobile" class="form-control form-control-sm" maxlength="10" value={{.Get "mobile"}}>
+            <input type="text" name="mobile" class="form-control form-control-sm" value={{.Get "mobile"}}>
             <br>
             <div class="text-center mt-4 mb-2">
                 <input class="btn btn-info" type='submit' value='Add Contact'>

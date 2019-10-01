@@ -45,7 +45,7 @@ func (c *ContactModel) Get(id int) (*models.Contact, error) {
 
 func (c *ContactModel) Latest(uid int) ([]*models.Contact, error) {
 
-	stmt := `SELECT id, name, contact FROM contacts WHERE created_by_id = ?`
+	stmt := `SELECT id, name, contact FROM contacts WHERE created_by_id = ? ORDER BY id DESC;`
 
 	rows, err := c.DB.Query(stmt, uid)
 	if err != nil {

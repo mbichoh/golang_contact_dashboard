@@ -1,7 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -131,6 +135,86 @@ func (app *application) ShowContact(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "show.page.tmpl", &templateData{
 		Contact: s,
 	})
+
+}
+
+func (app *application) SendMessageToContact(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusSeeOther)
+		return
+	}
+	form := forms.New(r.PostForm)
+	form.Required("msgBody")
+	phoneNo := form.Get("phoneNo")
+	msg := form.Get("msgBody")
+
+	//api sms
+
+	// endpoint
+	var sendMessageURL string = "https://api.amisend.com/v1/sms/send"
+
+	// authentication
+
+	var username string = "Nathan"
+	var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
+
+	// data
+
+	messageData := map[string]string{
+		"phoneNumbers": phoneNo,
+		"message":      msg,
+		"senderId":     "", // leave blank if you do not have a custom sender Id
+	}
+
+	params, _ := json.Marshal(messageData)
+
+	request, err := http.NewRequest("POST", sendMessageURL, bytes.NewBuffer(params))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Set("x-api-user", username)
+	request.Header.Set("x-api-key", apikey)
+	request.Header.Set("Content-Length", strconv.Itoa(len(params)))
+
+	response, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer response.Body.Close()
+
+	fmt.Println(string(body))
+	//api sms
+	app.session.Put(r, "flash", "Message sent successful")
+	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
+	if err != nil || id < 1 {
+		app.notFound(w)
+		return
+	}
+
+	s, err := app.contacts.Get(id)
+	if err == models.ErrNoRecord {
+		app.notFound(w)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "show.page.tmpl", &templateData{
+		Contact: s,
+	})
 }
 
 func (app *application) CreateContactForm(w http.ResponseWriter, r *http.Request) {
@@ -147,7 +231,7 @@ func (app *application) CreateContact(w http.ResponseWriter, r *http.Request) {
 	}
 	form := forms.New(r.PostForm)
 	form.Required("name", "mobile")
-	form.MinLength("mobile", 10)
+	form.MinLength("mobile", 13)
 	form.MobileNumberCheck("mobile", forms.NumberCheck)
 
 	if !form.Valid() {
@@ -162,6 +246,52 @@ func (app *application) CreateContact(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
+	var addContactURL string = "https://api.amisend.com/v1/contacts/add"
+
+	// authentication
+	var username string = "Nathan"
+	var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
+
+	// data
+	createContact := map[string]string{
+		"name":   form.Get("name"),
+		"phone":  form.Get("mobile"),
+		"tags":   "",
+		"groups": "",
+	}
+
+	params, _ := json.Marshal(createContact)
+
+	// request
+	request, err := http.NewRequest("POST", addContactURL, bytes.NewBuffer(params))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Set("x-api-user", username)
+	request.Header.Set("x-api-key", apikey)
+	request.Header.Set("Content-Length", strconv.Itoa(len(params)))
+
+	// response
+	response, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer response.Body.Close()
+
+	fmt.Println(string(body))
+
 	app.session.Put(r, "flash", "Contact created successful")
 	http.Redirect(w, r, fmt.Sprintf("/contact/%d", id), http.StatusSeeOther)
 
@@ -279,6 +409,10 @@ func (app *application) GroupedContacts(w http.ResponseWriter, r *http.Request) 
 		Contacts: s,
 		Group:    g,
 	})
+}
+
+func (app *application) SendMessageToGroup(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (app *application) DelGroupContact(w http.ResponseWriter, r *http.Request) {

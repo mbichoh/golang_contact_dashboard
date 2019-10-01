@@ -23,9 +23,27 @@
         </table>
      <p class="group-action">
         <a class="btn btn-danger" href="/contact/del/group/{{.Group.ID}}"><i class="fas fa-trash"> Delete Group</i> </a>
-        <button class="btn btn-info"><i class="fas fa-sms"> Send Message</i></button>
+        <button class="btn btn-info" onclick="document.getElementById('msgModel').style.display='block'"><i class="fas fa-sms"> Send Message</i></button>
       </p>
-     
+      <div id="msgModel" class="modal">
+  
+        <form class="modal-content animate" action="" method="post">
+          <div class="closeContainer">
+          <span onclick="document.getElementById('msgModel').style.display='none'" class="close" title="Close Modal">&times;</span>
+          </div>
+        
+          <div class="container">
+          <div class="form-group mx-sm-6 mb-2">
+          To group: <input class="form-control" type="text" value="{{.Group.Name}}" readonly>
+        </div>
+            
+          <label>Message:</label>
+          <textarea name="msgBody" required style="height: 150px"> </textarea>
+          
+          <button class="btnsms" type="submit">Send Message</button>
+            </div>
+        </form>
+        </div>
         </p>
       </div>
 {{end}}
