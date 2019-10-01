@@ -363,7 +363,44 @@ func (app *application) DelContact(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-	fmt.Printf("%d", id)
+
+	// endpoint
+	var deleteContactURL string = "https://api.amisend.com/v1/contacts/delete"
+
+	// authentication
+	var username string = "Nathan"
+	var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
+
+	data := map[string][]int{
+		"contactIds": []int{id},
+	}
+
+	params, _ := json.Marshal(data)
+
+	// request
+	request, err := http.NewRequest("POST", deleteContactURL, bytes.NewBuffer(params))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// headers
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("x-api-user", username)
+	request.Header.Set("x-api-key", apikey)
+
+	response, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, _ := ioutil.ReadAll(response.Body)
+
+	defer response.Body.Close()
+
+	fmt.Println(string(body))
+
 	app.session.Put(r, "flash", "Contact deleted successful")
 	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
 }
@@ -479,6 +516,12 @@ func (app *application) CreateGroupedContacts(w http.ResponseWriter, r *http.Req
 		app.serverError(w, err)
 		return
 	}
+
+	//add group to api
+
+
+	//end
+
 	abc := strings.Split(contactid, ",")
 	for _, b := range abc {
 		d, _ := strconv.Atoi(b)
