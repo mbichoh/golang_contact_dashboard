@@ -569,6 +569,53 @@ func (app *application) CreateGroupedContacts(w http.ResponseWriter, r *http.Req
 		fmt.Printf("%d", id)
 	}
 
+
+// 	//add contacts to group
+// 	var groupId string = ""
+//     // endpoint
+//     var addContactsToGroupURL string = "https://api.amisend.com/v1/contacts/add/"+groupId
+
+//     // data
+
+//     data:= map[string][]int{
+//         "contactIds":[]int{d},
+//     }
+
+//     paramss, _ := json.Marshal(data)
+
+//     // request
+
+//     requestt, err := http.NewRequest("POST", addContactsToGroupURL, bytes.NewBuffer(paramss))
+
+//     if err != nil {
+//         panic(err.Error())
+//     }
+
+//     // headers
+//     requestt.Header.Set("Content-Type", "application/json")
+//     requestt.Header.Set("x-api-user", username)
+//     requestt.Header.Set("x-api-key", apikey)
+
+//     // response
+//     responsee, err := http.DefaultClient.Do(requestt)
+
+//     if err != nil {
+//         panic(err.Error())
+//     }
+
+//     bodyy, err := ioutil.ReadAll(responsee.Body)
+
+//     if err != nil {
+//         panic(err.Error())
+//     }
+
+//     defer responsee.Body.Close()
+
+//     fmt.Println(string(body))
+
+// 	//emd
+
+
 	fmt.Printf("%d", idcn)
 	app.session.Put(r, "flash", "Group Created successful")
 	fmt.Fprintln(w, strconv.Itoa(idcn))
