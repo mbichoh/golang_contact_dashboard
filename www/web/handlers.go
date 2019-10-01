@@ -518,7 +518,43 @@ func (app *application) CreateGroupedContacts(w http.ResponseWriter, r *http.Req
 	}
 
 	//add group to api
+		// endpoint
+		var addGroupURL string = "https://api.amisend.com/v1/contacts/groups/add"
 
+		// authentication
+	var username string = "Nathan"
+	var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
+	
+		// data
+		groupData := map[string]string{
+			"name": groupname,
+			"tags": "",
+		}
+	
+		params, _ := json.Marshal(groupData)
+	
+		request, err := http.NewRequest("POST", addGroupURL, bytes.NewBuffer(params))
+	
+		request.Header.Add("Content-Type", "application/json")
+		request.Header.Set("x-api-user", username)
+		request.Header.Set("x-api-key", apikey)
+		request.Header.Set("Content-Length", strconv.Itoa(len(params)))
+	
+		response, err := http.DefaultClient.Do(request)
+	
+		if err != nil {
+			panic(err.Error())
+		}
+	
+		body, err := ioutil.ReadAll(response.Body)
+	
+		if err != nil {
+			panic(err.Error())
+		}
+	
+		defer response.Body.Close()
+	
+		fmt.Println(string(body))
 
 	//end
 
