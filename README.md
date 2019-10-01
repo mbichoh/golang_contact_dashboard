@@ -3,4 +3,4 @@ GOlang contact dashboard for adding contacts and grouping them, as family, frien
 ```
 https://github.com/mbichoh/golang-contact_dashboard
 ```
-...[More]
+...[More](https://github.com/mbichoh/golang-contact_dashboard)
