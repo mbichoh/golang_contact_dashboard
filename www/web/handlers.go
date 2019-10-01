@@ -449,7 +449,83 @@ func (app *application) GroupedContacts(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) SendMessageToGroup(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
+	if err != nil || id < 1 {
+		app.notFound(w)
+		return
+	}
 
+	form := forms.New(r.PostForm)
+	form.Required("msgBody")
+	msg := form.Get("msgBody")
+
+	s, err := app.contacts.GetGroupedContacts(id)
+	if err == models.ErrNoRecord {
+		app.notFound(w)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	g, err := app.groups.Get(id)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	var groupID string = r.URL.Query().Get(":id")
+	// endpoint
+	var sendMessageURL string = "https://api.amisend.com/v1/sms/send/group/" + groupID
+
+	// authentication
+	var username string = "Nathan"
+	var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
+
+	// data
+	createMessage := map[string]string{
+		"message":  msg,
+		"senderId": "",
+	}
+
+	params, err := json.Marshal(createMessage)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// request
+	request, err := http.NewRequest("POST", sendMessageURL, bytes.NewBuffer(params))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// headers
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("x-api-user", username)
+	request.Header.Set("x-api-key", apikey)
+
+	// response
+	response, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	fmt.Println(string(body))
+
+	app.session.Put(r, "flash", "Message sent successful")
+	app.render(w, r, "grouped.page.tmpl", &templateData{
+		Contacts: s,
+		Group:    g,
+	})
 }
 
 func (app *application) DelGroupContact(w http.ResponseWriter, r *http.Request) {
@@ -464,6 +540,48 @@ func (app *application) DelGroupContact(w http.ResponseWriter, r *http.Request) 
 		app.serverError(w, err)
 		return
 	}
+
+	// //delete contact from group api
+	// var groupID string = r.URL.Query().Get(":id")
+    // var deleteGroupContactsURL string = "https://api.amisend.com/v1/contacts/delete/"+groupID
+
+    // // authentication
+    // var username string = "Nathan"
+	// var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
+
+    // // data
+    // contactIds := map[string][]int{
+    //     "contactIds":[]int{id},
+    // }
+
+    // params, _ := json.Marshal(contactIds)
+
+    // // request
+    // request, err := http.NewRequest("POST", deleteGroupContactsURL, bytes.NewBuffer(params))
+
+    // if err != nil {
+    //     panic(err.Error())
+    // }
+
+    // request.Header.Set("Content-Type", "application/json")
+    // request.Header.Set("x-api-user", username)
+    // request.Header.Set("x-api-key", apikey)
+
+    // // response
+    // response, err := http.DefaultClient.Do(request)
+
+    // if err != nil {
+    //     panic(err.Error())
+    // }
+
+    // body, err := ioutil.ReadAll(response.Body)
+
+    // if err != nil {
+    //     panic(err.Error())
+    // }
+
+    // fmt.Println(string(body))
+	//end
 	fmt.Printf("%d", id)
 	app.session.Put(r, "flash", "Contact from group deleted successful")
 	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
