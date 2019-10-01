@@ -29,6 +29,7 @@ func (u *UserModel) Insert(name, mobile, password string) error {
 			if mysqlErr.Number == 1062 && strings.Contains(mysqlErr.Message, "users_uc_mobile") {
 				return models.ErrDuplicateNumber
 			}
+			// CHECK: what if mysql change their error number and error messages? Your application will break
 		}
 	}
 	return err

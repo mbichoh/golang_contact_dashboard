@@ -22,6 +22,7 @@ func (gc *GroupedContactsModel) Insert(contactid, groupnameid int) (int, error) 
 	}
 	return int(id), nil
 }
+
 func (gc *GroupedContactsModel) DeleteContact(id_no int) (int, error) {
 	stmt := `delete from grouped_contacts where contact_id = ?;`
 	result, err := gc.DB.Exec(stmt, id_no)

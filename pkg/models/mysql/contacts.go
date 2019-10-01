@@ -89,6 +89,8 @@ func (c *ContactModel) Delete(id_no int) (int, error) {
 
 func (c *ContactModel) Update(name, contact, idn string) (int, error) {
 
+	// CHECK : in this function, i see you are expecting idn set as a string? 
+
 	stmt := `UPDATE contacts SET name = ?, contact = ? WHERE id = ?`
 
 	result, err := c.DB.Exec(stmt, name, contact, idn)

@@ -32,6 +32,8 @@ var contextKeyUser = contextKey("user")
 
 func main() {
 
+	// CHECK : You should have one config for all this, port, passwords, etc
+
 	addr := flag.String("addr", ":7076", "	HTTP network address")
 	dsn := flag.String("dsn", "golang:goconnect@/demogo?parseTime=true", "MySQL data source name")
 	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
@@ -73,6 +75,9 @@ func main() {
 	}
 
 	infoLog.Printf("Server starting on %s", *addr)
+
+	// CHECK : I dont see any tls, install local tls certificate and ListenAndServeTLS('path'/to/tls)
+
 	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }

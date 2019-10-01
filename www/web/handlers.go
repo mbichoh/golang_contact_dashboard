@@ -38,8 +38,16 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// CHECK : what if i give my phone number as "1234567891"?
+	// CHECK: what if i give my phone number as "abcdefghij"?
+	// CHECK: what if my phone number is in Congo?
+
 	err = app.users.Insert(form.Get("name"), form.Get("mobile"), form.Get("password"))
+
 	if err == models.ErrDuplicateNumber {
+
+		// CHECK: what if mysql change their error number and error messages? Your application will break
+
 		form.Errors.Add("mobile", "Phone number already in use")
 		app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
 		return
@@ -52,6 +60,7 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
+
 func (app *application) loginForm(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "login.page.tmpl", &templateData{
 		Form: forms.New(nil),
@@ -68,6 +77,10 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 
 	form := forms.New(r.PostForm)
 
+	// CHECK: what if i give my phone number as "1234567891"?
+	// CHECK: what if i give my phone number as "abcdefghij"?
+	// CHECK: what if my phone number is in Congo?
+
 	id, err := app.users.Authenticate(form.Get("mobile"), form.Get("password"))
 	if err == models.ErrInvalidCredentials {
 		form.Errors.Add("generic", "Phone number or Password is incorrect")
@@ -78,12 +91,18 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// CHECK : How do you confirm the phone number I gave is actually mine? 
+	// CHECK : You should send me a unique code and ask me to give it to you, if it matches let me login else deny me a chance
+
 	app.session.Put(r, "userID", id)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
 }
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
+
+	// CHECK: Its always important to check if a session actually exists before attempting to remove it
+	
 	app.session.Remove(r, "userID")
 	app.session.Put(r, "flash", "Logged out successfully")
 	http.Redirect(w, r, "/user/login", 303)
@@ -156,6 +175,10 @@ func (app *application) SendMessageToContact(w http.ResponseWriter, r *http.Requ
 
 	// authentication
 
+	// CHECK: You committed this, you should not push your passwords to git
+	// CHECK: This credentials should be in a a config .yaml or .toml file, or in a go dedicated config file
+	// CHECK: This is not scalable
+
 	var username string = "Nathan"
 	var apikey string = "ami_T35uayCbJ2YRIBUB6iE0RKfpiJUArT56q2lUhOc28ltFv"
 
@@ -195,6 +218,8 @@ func (app *application) SendMessageToContact(w http.ResponseWriter, r *http.Requ
 	defer response.Body.Close()
 
 	fmt.Println(string(body))
+	// CHECK: what does this do? better logging is handled by writing to a log_ file
+
 	//api sms
 	app.session.Put(r, "flash", "Message sent successful")
 	id, err := strconv.Atoi(r.URL.Query().Get(":id"))
@@ -247,6 +272,7 @@ func (app *application) CreateContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	
 	var addContactURL string = "https://api.amisend.com/v1/contacts/add"
 
 	// authentication
@@ -604,6 +630,7 @@ func (app *application) DelGroup(w http.ResponseWriter, r *http.Request) {
 	app.session.Put(r, "flash", "Group deleted successful")
 	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
 }
+
 func (app *application) DispGroupedContacts(w http.ResponseWriter, r *http.Request) {
 
 	uid := app.session.GetInt(r, "userID")
