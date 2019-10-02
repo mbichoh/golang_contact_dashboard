@@ -10,6 +10,7 @@ import (
 
 type templateData struct {
 	AuthenticatedUser *models.User
+	CSRFToken         string
 	Flash             string
 	Form              *forms.Form
 	User              *models.User

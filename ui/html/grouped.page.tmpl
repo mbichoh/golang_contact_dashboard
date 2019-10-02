@@ -28,6 +28,7 @@
       <div id="msgModel" class="modal">
   
         <form class="modal-content animate" action="" method="post">
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
           <div class="closeContainer">
           <span onclick="document.getElementById('msgModel').style.display='none'" class="close" title="Close Modal">&times;</span>
           </div>

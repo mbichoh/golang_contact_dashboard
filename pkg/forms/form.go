@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/nyaruka/phonenumbers"
 )
 
 var NumberCheck = regexp.MustCompile("[0-9]")
@@ -47,7 +49,7 @@ func (f *Form) MinLength(field string, d int) {
 		return
 	}
 	if utf8.RuneCountInString(value) != d {
-		f.Errors.Add(field, fmt.Sprintf("Value length should be %d", d))
+		f.Errors.Add(field, fmt.Sprintf("Check value length", d))
 	}
 }
 
@@ -59,6 +61,20 @@ func (f *Form) MobileNumberCheck(field string, pattern *regexp.Regexp) {
 	if !pattern.MatchString(value) {
 		f.Errors.Add(field, "This number is invalid")
 	}
+}
+
+func (f *Form) MobileCountryCheckCode(field string) {
+	value := f.Get(field)
+	num, _ := phonenumbers.Parse(value, "")
+	// if err != nil{
+	// 	f.Errors.Add(field,"Invalid country code number")
+	// }
+	formattedNum := phonenumbers.Format(num, phonenumbers.INTERNATIONAL)
+
+	if value != formattedNum {
+		f.Errors.Add(field, "Invalid phone number")
+	}
+
 }
 
 func (f *Form) Valid() bool {

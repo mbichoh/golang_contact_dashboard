@@ -14,16 +14,16 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-func (u *UserModel) Insert(name, mobile, password string) error {
+func (u *UserModel) Insert(name string, mobile string, password string, token int, verified bool) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
 	}
 
-	stmt := `INSERT INTO contact_users (name, mobile, hashed_password) VALUES(?, ?, ?)`
+	stmt := `INSERT INTO contact_users (name, mobile, hashed_password, token, isVerified) VALUES(?, ?, ?, ?, ?)`
 
-	_, err = u.DB.Exec(stmt, name, mobile, string(hashedPassword))
+	_, err = u.DB.Exec(stmt, name, mobile, string(hashedPassword), token, verified)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			if mysqlErr.Number == 1062 && strings.Contains(mysqlErr.Message, "users_uc_mobile") {

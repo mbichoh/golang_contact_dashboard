@@ -2,6 +2,8 @@ package mysql
 
 import (
 	"database/sql"
+	"math/rand"
+	"strconv"
 
 	"github.com/mbichoh/contactDash/pkg/models"
 )
@@ -13,8 +15,8 @@ type ContactModel struct {
 func (c *ContactModel) Insert(name string, contact string, uid int) (int, error) {
 
 	stmt := `INSERT INTO contacts (name, contact, created_by_id) VALUES (?,?,?)`
-
-	result, err := c.DB.Exec(stmt, name, contact, uid)
+	userToken := strconv.Itoa(rand.Intn(10000))
+	result, err := c.DB.Exec(stmt, name, contact, uid, userToken, 0)
 	if err != nil {
 		return 0, nil
 	}
@@ -87,7 +89,7 @@ func (c *ContactModel) Delete(id_no int) (int, error) {
 	return int(id), nil
 }
 
-func (c *ContactModel) Update(name, contact, idn string) (int, error) {
+func (c *ContactModel) Update(name string, contact string, idn int) (int, error) {
 
 	// CHECK : in this function, i see you are expecting idn set as a string? 
 

@@ -13,7 +13,7 @@
 <body>
     {{if .AuthenticatedUser}}
         <form class='loggi' method='POST' action='/user/logout'>
-                
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
                Welcome ({{.AuthenticatedUser.Name}})  <button> Logout </button>
         </form>
     {{else}}

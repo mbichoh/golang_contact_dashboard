@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/justinas/nosurf"
 	"context"
 	"fmt"
 	"net/http"
@@ -68,4 +69,15 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), contextKeyUser, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func noSurf(next http.Handler) http.Handler{
+	csrfHandler := nosurf.New(next)
+	csrfHandler.SetBaseCookie(http.Cookie{
+		HttpOnly: true,
+		Path: "/",
+		Secure: true,
+	})
+
+	return csrfHandler
 }

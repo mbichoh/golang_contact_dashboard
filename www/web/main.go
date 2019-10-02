@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -30,19 +31,25 @@ type contextKey string
 
 var contextKeyUser = contextKey("user")
 
+type Config struct {
+	Addr, DSN, Secret string
+}
+
 func main() {
 
 	// CHECK : You should have one config for all this, port, passwords, etc
 
-	addr := flag.String("addr", ":7076", "	HTTP network address")
-	dsn := flag.String("dsn", "golang:goconnect@/demogo?parseTime=true", "MySQL data source name")
-	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
+	config := new(Config)
+
+	flag.StringVar(&config.Addr, "addr", ":7076", "	HTTP network address")
+	flag.StringVar(&config.DSN, "dsn", "golang:goconnect@/demogo?parseTime=true", "MySQL data source name")
+	flag.StringVar(&config.Secret, "secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Llongfile)
 
-	db, err := openDB(*dsn)
+	db, err := openDB(*&config.DSN)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -54,8 +61,9 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
-	session := sessions.New([]byte(*secret))
+	session := sessions.New([]byte(*&config.Secret))
 	session.Lifetime = 12 * time.Hour
+	session.Secure = true
 
 	app := &application{
 		errorLog:        errorLog,
@@ -68,17 +76,26 @@ func main() {
 		templateCache:   templateCache,
 	}
 
-	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+	tlsConfig := &tls.Config{
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
-	infoLog.Printf("Server starting on %s", *addr)
+	srv := &http.Server{
+		Addr:         *&config.Addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	infoLog.Printf("Server starting on %s", *&config.Addr)
 
 	// CHECK : I dont see any tls, install local tls certificate and ListenAndServeTLS('path'/to/tls)
 
-	err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 

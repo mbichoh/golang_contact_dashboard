@@ -3,6 +3,7 @@
 {{define "body"}}
 <div class="form-login">
 <form class="text-center border border-light p-5" action='/user/login' method='POST' novalidate>
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
 {{with .Form}}
     {{with .Errors.Get "generic"}}
         <div class="alert alert-danger">

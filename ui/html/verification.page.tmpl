@@ -1,0 +1,21 @@
+{{template "base" .}}
+{{define "title"}}Verification {{end}}
+{{define "body"}}
+<div class="form-login">
+<form class="text-center border border-light p-5" action='/user//verify' method='POST' novalidate>
+    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+{{with .Form}}
+    {{with .Errors.Get "generic"}}
+        <div class="alert alert-danger">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+        <strong>{{.}}</strong>
+        </div>
+    {{end}}
+    <p class="h4">Verify your account</p>
+    <input type="text" name="verify" class="form-control" minlength="5" placeholder="Verification code" value="{{.Get ""}}">
+    <br>
+    <input class="btn btn-info btn-block my-4" type="submit" value="Verify">
+{{end}}
+</form>
+</div>
+{{end}}
