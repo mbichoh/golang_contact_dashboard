@@ -12,7 +12,7 @@ type ContactModel struct {
 
 func (c *ContactModel) Insert(name string, contact string, uid int) (int, error) {
 
-	stmt := `INSERT INTO contacts (name, contact, created_by_id) VALUES (?,?,?)`
+	stmt := `INSERT INTO contacts (name, phoneNumber, created_by_id) VALUES (?,?,?)`
 
 	result, err := c.DB.Exec(stmt, name, contact, uid)
 	if err != nil {
@@ -26,7 +26,7 @@ func (c *ContactModel) Insert(name string, contact string, uid int) (int, error)
 }
 
 func (c *ContactModel) Get(id int) (*models.Contact, error) {
-	stmt := `SELECT id, name, contact FROM contacts WHERE id = ?`
+	stmt := `SELECT id, name, phoneNumber FROM contacts WHERE id = ?`
 
 	row := c.DB.QueryRow(stmt, id)
 
@@ -45,7 +45,7 @@ func (c *ContactModel) Get(id int) (*models.Contact, error) {
 
 func (c *ContactModel) Latest(uid int) ([]*models.Contact, error) {
 
-	stmt := `SELECT id, name, contact FROM contacts WHERE created_by_id = ? ORDER BY id DESC;`
+	stmt := `SELECT id, name, phoneNumber FROM contacts WHERE created_by_id = ? ORDER BY id DESC;`
 
 	rows, err := c.DB.Query(stmt, uid)
 	if err != nil {
@@ -91,7 +91,7 @@ func (c *ContactModel) Update(name string, contact string, idn int) (int, error)
 
 	// CHECK : in this function, i see you are expecting idn set as a string?
 
-	stmt := `UPDATE contacts SET name = ?, contact = ? WHERE id = ?`
+	stmt := `UPDATE contacts SET name = ?, phoneNumber = ? WHERE id = ?`
 
 	result, err := c.DB.Exec(stmt, name, contact, idn)
 
@@ -107,7 +107,7 @@ func (c *ContactModel) Update(name string, contact string, idn int) (int, error)
 
 func (c *ContactModel) GetGroupedContacts(group_id int) ([]*models.Contact, error) {
 
-	stmt := `select c1.id, c1.name, c1.contact from contacts
+	stmt := `select c1.id, c1.name, c1.phoneNumber from contacts
 					c1 inner join groups c3 inner join grouped_contacts c2 
 						on c1.id = c2.contact_id and c3.id = c2.group_id 
 							where c2.group_id = ?;`

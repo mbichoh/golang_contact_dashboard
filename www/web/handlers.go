@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mbichoh/contactDash/pkg/forms"
 	"github.com/mbichoh/contactDash/pkg/models"
@@ -40,9 +41,12 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 	// CHECK: what if i give my phone number as "abcdefghij"?
 	// CHECK: what if my phone number is in Congo?
 
-	userToken := rand.Intn(10000)
+	rand.Seed(time.Now().UnixNano())
+	min := 10000
+	max := 99999
+	tokenCode := rand.Intn(max-min+1) + min
 
-	err = app.users.Insert(form.Get("name"), form.Get("mobile"), form.Get("password"), userToken, false)
+	err = app.users.Insert(form.Get("name"), form.Get("mobile"), form.Get("password"), tokenCode, false)
 
 	if err == models.ErrDuplicateNumber {
 
@@ -86,6 +90,9 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		form.Errors.Add("generic", "Phone number or Password is incorrect")
 		app.render(w, r, "login.page.tmpl", &templateData{Form: form})
 		return
+	} else if err == models.ErrNotVerified {
+		form.Errors.Add("validation", "Please check your message to verify...")
+		http.Redirect(w, r, "/user/verification", http.StatusSeeOther)
 	} else if err != nil {
 		app.serverError(w, err)
 		return
@@ -116,19 +123,39 @@ func (app *application) verified(w http.ResponseWriter, r *http.Request) {
 	form := forms.New(r.PostForm)
 	form.Required("activation")
 
+	actCode, _ := strconv.Atoi(form.Get("activation"))
+	id, err := app.users.Verify(actCode)
+	if err == models.ErrNoRecord {
+		form.Errors.Add("activation", "Invalid verification code, please check again.")
+		app.render(w, r, "verification.page.tmpl", &templateData{Form: form})
+		return
+	} else if !form.Valid() {
+		app.render(w, r, "verification.page.tmpl", &templateData{Form: form})
+		return
+	}
+	fmt.Printf("%d", id.Token)
+	idNo, err := app.users.IsVerified(actCode)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	fmt.Printf("Rows affected := %d\n", idNo)
+	app.session.Put(r, "flash", "Account verified... Please login.")
+	http.Redirect(w, r, "/user/login", 303)
+
 }
 
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 
 	// CHECK: Its always important to check if a session actually exists before attempting to remove it -done
-	err := app.session.Exists
-	if err != nil {
-		app.session.Put(r, "flash", "No session exists.")
-	} else {
-		app.session.Remove(r, "userID")
-		app.session.Put(r, "flash", "Logged out successfully")
-		http.Redirect(w, r, "/user/login", 303)
-	}
+
+	// if app.session.GetInt(r, "userID") != 0 {
+	// 	app.session.Put(r, "flash", "No session exists.")
+	// } else {
+	app.session.Remove(r, "userID")
+	app.session.Put(r, "flash", "Logged out successfully")
+	http.Redirect(w, r, "/user/login", 303)
+	//}
 
 }
 

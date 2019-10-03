@@ -13,6 +13,7 @@ import (
 	"github.com/golangcollege/sessions"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/mbichoh/contactDash/pkg/models"
 	"github.com/mbichoh/contactDash/pkg/models/mysql"
 )
 
@@ -31,19 +32,15 @@ type contextKey string
 
 var contextKeyUser = contextKey("user")
 
-type Config struct {
-	Addr, DSN, Secret string
-}
-
 func main() {
 
 	// CHECK : You should have one config for all this, port, passwords, etc
 
-	config := new(Config)
+	config := new(models.Config)
 
-	flag.StringVar(&config.Addr, "addr", ":7076", "	HTTP network address")
-	flag.StringVar(&config.DSN, "dsn", "golang:goconnect@/demogo?parseTime=true", "MySQL data source name")
-	flag.StringVar(&config.Secret, "secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
+	flag.StringVar(&config.Addr, "addr", models.AddPort, "HTTP network address")
+	flag.StringVar(&config.DSN, "dsn", models.Dsn, "MySQL data source name")
+	flag.StringVar(&config.Secret, "secret", models.SecretKey, "Secret key")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)

@@ -2,11 +2,9 @@ package mysql
 
 import (
 	"database/sql"
-	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/mbichoh/contactDash/pkg/models"
 )
 
@@ -22,26 +20,27 @@ func (u *UserModel) Insert(name string, mobile string, password string, token in
 	}
 
 	stmt := `INSERT INTO contact_users (name, mobile, hashed_password, token, isVerified) VALUES(?, ?, ?, ?, ?)`
-
+	stmtCheck := `SELECT * FROM contact_users WHERE mobile = ?`
+	row := u.DB.QueryRow(stmtCheck, mobile)
+	if row.Scan(&mobile) != sql.ErrNoRows {
+		return models.ErrDuplicateNumber
+	}
 	_, err = u.DB.Exec(stmt, name, mobile, string(hashedPassword), token, verified)
 	if err != nil {
-		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			if mysqlErr.Number == 1062 && strings.Contains(mysqlErr.Message, "users_uc_mobile") {
-				return models.ErrDuplicateNumber
-			}
-			// CHECK: what if mysql change their error number and error messages? Your application will break
-		}
+		return err
 	}
+
 	return err
 
 }
 
-func (u *UserModel) Authenticate(mobile, password string) (int, error) {
+func (u *UserModel) Authenticate(mobile string, password string) (int, error) {
 
 	var id int
 	var hashedPassword []byte
+	var isVer bool = true
 
-	row := u.DB.QueryRow("SELECT id, hashed_password FROM contact_users WHERE mobile = ?", mobile)
+	row := u.DB.QueryRow("SELECT id, hashed_password  FROM contact_users WHERE mobile = ? AND isVerified = true ", mobile)
 	err := row.Scan(&id, &hashedPassword)
 
 	if err == sql.ErrNoRows {
@@ -55,6 +54,10 @@ func (u *UserModel) Authenticate(mobile, password string) (int, error) {
 		return 0, models.ErrInvalidCredentials
 	} else if err != nil {
 		return 0, err
+	}
+
+	if isVer != true {
+		return 0, models.ErrNotVerified
 	}
 
 	return id, nil
@@ -72,6 +75,30 @@ func (u *UserModel) Get(id int) (*models.User, error) {
 	return s, nil
 }
 
-// func (u *UserModel) Verify(token int, isVerified bool) (int, error) {
+func (u *UserModel) Verify(token int) (*models.User, error) {
 
-// }
+	stmt := `SELECT id, mobile FROM contact_users WHERE token = ? AND isVerified = false`
+	row := u.DB.QueryRow(stmt, token)
+
+	s := &models.User{}
+
+	if row.Scan(&s.Mobile) == sql.ErrNoRows {
+		return nil, models.ErrNoRecord
+	}
+
+	return s, nil
+}
+
+func (u *UserModel) IsVerified(idn int) (int, error) {
+	stmtCheck := `UPDATE contact_users SET token = 0, isVerified = true  WHERE token = ?`
+	result, err := u.DB.Exec(stmtCheck, idn)
+
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(id), nil
+}
