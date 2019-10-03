@@ -71,3 +71,7 @@ func (u *UserModel) Get(id int) (*models.User, error) {
 	}
 	return s, nil
 }
+
+// func (u *UserModel) Verify(token int, isVerified bool) (int, error) {
+
+// }

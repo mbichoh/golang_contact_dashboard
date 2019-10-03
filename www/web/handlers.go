@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,9 +27,9 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 
 	form := forms.New(r.PostForm)
 	form.Required("name", "mobile", "password")
-	//form.MinLength("mobile", 13)
 	form.MobileNumberCheck("mobile", forms.NumberCheck)
-	form.MobileCountryCheckCode("mobile")
+	form.MobileCountryCheckCode("mobile", forms.NumberValid)
+	form.MobileCheckPref("mobile")
 
 	if !form.Valid() {
 		app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
@@ -39,7 +40,9 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 	// CHECK: what if i give my phone number as "abcdefghij"?
 	// CHECK: what if my phone number is in Congo?
 
-	err = app.users.Insert(form.Get("name"), form.Get("mobile"), form.Get("password"))
+	userToken := rand.Intn(10000)
+
+	err = app.users.Insert(form.Get("name"), form.Get("mobile"), form.Get("password"), userToken, false)
 
 	if err == models.ErrDuplicateNumber {
 
@@ -53,9 +56,9 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.session.Put(r, "flash", "Signup successful. Please log in...")
+	app.session.Put(r, "flash", "Sign up successful. Please check message and verify...")
 
-	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/user/verification", http.StatusSeeOther)
 }
 
 func (app *application) loginForm(w http.ResponseWriter, r *http.Request) {
@@ -96,18 +99,37 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
 }
+
+func (app *application) verification(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "verification.page.tmpl", &templateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (app *application) verified(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("activation")
+
+}
+
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 
 	// CHECK: Its always important to check if a session actually exists before attempting to remove it -done
 	err := app.session.Exists
 	if err != nil {
 		app.session.Put(r, "flash", "No session exists.")
-	}else{
+	} else {
 		app.session.Remove(r, "userID")
 		app.session.Put(r, "flash", "Logged out successfully")
 		http.Redirect(w, r, "/user/login", 303)
 	}
-	
+
 }
 
 func (app *application) ContactHome(w http.ResponseWriter, r *http.Request) {
@@ -208,6 +230,8 @@ func (app *application) CreateContact(w http.ResponseWriter, r *http.Request) {
 	form.Required("name", "mobile")
 	form.MinLength("mobile", 13)
 	form.MobileNumberCheck("mobile", forms.NumberCheck)
+	form.MobileCountryCheckCode("mobile", forms.NumberValid)
+	form.MobileCheckPref("mobile")
 
 	if !form.Valid() {
 		app.render(w, r, "create.page.tmpl", &templateData{Form: form})
@@ -270,8 +294,8 @@ func (app *application) UpdateContact(w http.ResponseWriter, r *http.Request) {
 		app.render(w, r, "update.page.tmpl", &templateData{Form: form})
 		return
 	}
-
-	idNo, err := app.contacts.Update(form.Get("up_name"), form.Get("up_contact"), form.Get("up_id"))
+	uid := app.session.GetInt(r, "userID")
+	idNo, err := app.contacts.Update(form.Get("up_name"), form.Get("up_contact"), uid)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -294,7 +318,7 @@ func (app *application) DelContact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("%d",id)
+	fmt.Printf("%d", id)
 	app.session.Put(r, "flash", "Contact deleted successful")
 	http.Redirect(w, r, fmt.Sprint("/"), http.StatusSeeOther)
 }
@@ -343,7 +367,7 @@ func (app *application) GroupedContacts(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) SendMessageToGroup(w http.ResponseWriter, r *http.Request) {
-	
+
 }
 
 func (app *application) DelGroupContact(w http.ResponseWriter, r *http.Request) {

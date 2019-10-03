@@ -6,11 +6,10 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/nyaruka/phonenumbers"
 )
 
 var NumberCheck = regexp.MustCompile("[0-9]")
+var NumberValid = regexp.MustCompile(`(^\+[0-9]{2}|^\+[0-9]{2}\(0\)|^\(\+[0-9]{2}\)\(0\)|^00[0-9]{2}|^0)([0-9]{9}$|[0-9\-\s]{10}$)`)
 
 type Form struct {
 	url.Values
@@ -63,20 +62,24 @@ func (f *Form) MobileNumberCheck(field string, pattern *regexp.Regexp) {
 	}
 }
 
-func (f *Form) MobileCountryCheckCode(field string) {
+func (f *Form) MobileCountryCheckCode(field string, pattern *regexp.Regexp) {
 	value := f.Get(field)
-	num, _ := phonenumbers.Parse(value, "")
-	// if err != nil{
-	// 	f.Errors.Add(field,"Invalid country code number")
-	// }
-	formattedNum := phonenumbers.Format(num, phonenumbers.INTERNATIONAL)
-
-	if value != formattedNum {
+	if value == "" {
+		return
+	}
+	if !pattern.MatchString(value) {
 		f.Errors.Add(field, "Invalid phone number")
 	}
-
 }
-
+func (f *Form) MobileCheckPref(field string) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if !strings.HasPrefix(value, "+") {
+		f.Errors.Add(field, "Please check number. Must start with +")
+	}
+}
 func (f *Form) Valid() bool {
 	return len(f.Errors) == 0
 }

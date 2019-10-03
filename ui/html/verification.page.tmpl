@@ -2,7 +2,7 @@
 {{define "title"}}Verification {{end}}
 {{define "body"}}
 <div class="form-login">
-<form class="text-center border border-light p-5" action='/user//verify' method='POST' novalidate>
+<form class="text-center border border-light p-5" action='/user/verified' method='POST' novalidate>
     <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
 {{with .Form}}
     {{with .Errors.Get "generic"}}
@@ -11,8 +11,8 @@
         <strong>{{.}}</strong>
         </div>
     {{end}}
-    <p class="h4">Verify your account</p>
-    <input type="text" name="verify" class="form-control" minlength="5" placeholder="Verification code" value="{{.Get ""}}">
+    <p class="h4">Verify your account</p><br>
+    <input type="text" name="activation" class="form-control" minlength="5" placeholder="Activation code" value="{{.Get ""}}">
     <br>
     <input class="btn btn-info btn-block my-4" type="submit" value="Verify">
 {{end}}

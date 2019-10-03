@@ -14,7 +14,7 @@
     {{with .Errors.Get "mobile"}}
          <label class='error'>*{{.}}</label>
     {{end}}
-    <input type="mobile"  class="form-control" name='mobile' placeholder="Phone Number" value='{{.Get "mobile"}}'>
+    <input type="mobile"  class="form-control" name='mobile' maxlength="13" placeholder="Phone Number" value='{{.Get "mobile"}}'>
     <br>
     {{with .Errors.Get "password"}}
           <label class='error'>*{{.}}</label>
