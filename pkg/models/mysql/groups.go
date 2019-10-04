@@ -12,7 +12,7 @@ type GroupsModel struct {
 
 func (g *GroupsModel) GroupInsertName(name string) (int, error) {
 
-	stmt := `INSERT INTO groups(group_name) VALUES (?)`
+	stmt := `INSERT INTO groups(groupname) VALUES (?)`
 
 	result, err := g.DB.Exec(stmt, name)
 	if err != nil {
@@ -26,7 +26,7 @@ func (g *GroupsModel) GroupInsertName(name string) (int, error) {
 }
 func (g *GroupsModel) GroupFetchNames(id int) ([]*models.Groups, error) {
 
-	stmt := `select distinct c3.id, c3.group_name from contacts
+	stmt := `select distinct c3.id, c3.groupname from contacts
 		 		c1 inner join groups c3 inner join grouped_contacts c2 
 				 on c1.id = c2.contact_id and c3.id = c2.group_id 
 					 where c1.created_by_id = ?;`
@@ -58,7 +58,7 @@ func (g *GroupsModel) GroupFetchNames(id int) ([]*models.Groups, error) {
 }
 
 func (g *GroupsModel) Get(id int) (*models.Groups, error) {
-	stmt := `SELECT id, group_name FROM groups WHERE id = ?`
+	stmt := `SELECT id, groupname FROM groups WHERE id = ?`
 
 	row := g.DB.QueryRow(stmt, id)
 

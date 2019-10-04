@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -60,6 +63,50 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// endpoint
+	var sendMessageURL string = "https://api.amisend.com/v1/sms/send"
+
+	// authentication
+
+	var username string = models.Username
+	var apikey string = models.ApiKey
+
+	// data
+
+	messageData := map[string]string{
+		"phoneNumbers": form.Get("mobile"),
+		"message":      "Welcome " + form.Get("name") + " to Nathan's Amisend integretion. Your activation code is " + strconv.Itoa(tokenCode),
+		"senderId":     "", // leave blank if you do not have a custom sender Id
+	}
+
+	params, _ := json.Marshal(messageData)
+
+	request, err := http.NewRequest("POST", sendMessageURL, bytes.NewBuffer(params))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Set("x-api-user", username)
+	request.Header.Set("x-api-key", apikey)
+	request.Header.Set("Content-Length", strconv.Itoa(len(params)))
+
+	response, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer response.Body.Close()
+
+	fmt.Println(string(body))
 	app.session.Put(r, "flash", "Sign up successful. Please check message and verify...")
 
 	http.Redirect(w, r, "/user/verification", http.StatusSeeOther)
@@ -152,13 +199,13 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 
 	// CHECK: Its always important to check if a session actually exists before attempting to remove it -done
 
-	// if app.session.GetInt(r, "userID") != 0 {
-	// 	app.session.Put(r, "flash", "No session exists.")
-	// } else {
-	app.session.Remove(r, "userID")
-	app.session.Put(r, "flash", "Logged out successfully")
-	http.Redirect(w, r, "/user/login", 303)
-	//}
+	if app.session.Exists == nil {
+		app.session.Put(r, "flash", "No session exists.")
+	} else {
+		app.session.Remove(r, "userID")
+		app.session.Put(r, "flash", "Logged out successfully")
+		http.Redirect(w, r, "/user/login", 303)
+	}
 
 }
 
@@ -324,8 +371,9 @@ func (app *application) UpdateContact(w http.ResponseWriter, r *http.Request) {
 		app.render(w, r, "update.page.tmpl", &templateData{Form: form})
 		return
 	}
-	uid := app.session.GetInt(r, "userID")
-	idNo, err := app.contacts.Update(form.Get("up_name"), form.Get("up_contact"), uid)
+	contId, _ := strconv.Atoi(form.Get("up_id"))
+
+	idNo, err := app.contacts.Update(form.Get("up_name"), form.Get("up_contact"), contId)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -460,6 +508,9 @@ func (app *application) CreateGroupedContacts(w http.ResponseWriter, r *http.Req
 
 	contactid := r.FormValue("format")
 	groupname := r.FormValue("gname")
+
+	fmt.Printf("%s", groupname)
+	fmt.Printf("%s", contactid)
 
 	idcn, err := app.groups.GroupInsertName(groupname)
 	if err != nil {

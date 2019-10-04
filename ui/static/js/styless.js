@@ -27,6 +27,8 @@ function openCity(evt, cityName) {
     });
   }
 
+
+
   $("#submitBtn").click(function(event){
     event.preventDefault();
 
@@ -42,6 +44,7 @@ function openCity(evt, cityName) {
      var format = checked.join(',');
 
     $.post("/contact/group", 
+
     {
       gname: gname,
       format: format,
