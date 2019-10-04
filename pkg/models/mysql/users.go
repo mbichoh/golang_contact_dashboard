@@ -38,10 +38,9 @@ func (u *UserModel) Authenticate(mobile string, password string) (int, error) {
 
 	var id int
 	var hashedPassword []byte
-	var isVer bool = true
 
-	row := u.DB.QueryRow("SELECT id, hashed_password  FROM contact_users WHERE mobile = ? AND isVerified = true ", mobile)
-	err := row.Scan(&id, &hashedPassword)
+	row := u.DB.QueryRow("SELECT hashed_password  FROM contact_users WHERE mobile = ?", mobile)
+	err := row.Scan(&hashedPassword)
 
 	if err == sql.ErrNoRows {
 		return 0, models.ErrInvalidCredentials
@@ -56,10 +55,13 @@ func (u *UserModel) Authenticate(mobile string, password string) (int, error) {
 		return 0, err
 	}
 
-	if isVer != true {
+	result := u.DB.QueryRow("SELECT id FROM contact_users WHERE isVerified = true AND mobile = ?", mobile)
+	errr := result.Scan(&id)
+	if errr == sql.ErrNoRows {
 		return 0, models.ErrNotVerified
+	} else if errr != nil {
+		return 0, err
 	}
-
 	return id, nil
 }
 

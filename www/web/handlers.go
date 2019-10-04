@@ -91,8 +91,11 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		app.render(w, r, "login.page.tmpl", &templateData{Form: form})
 		return
 	} else if err == models.ErrNotVerified {
-		form.Errors.Add("validation", "Please check your message to verify...")
-		http.Redirect(w, r, "/user/verification", http.StatusSeeOther)
+		form.Errors.Add("activation", "Please check your message to verify...")
+		app.render(w, r, "verification.page.tmpl", &templateData{
+			Form: form,
+		})
+		return
 	} else if err != nil {
 		app.serverError(w, err)
 		return
@@ -255,7 +258,6 @@ func (app *application) CreateContact(w http.ResponseWriter, r *http.Request) {
 	}
 	form := forms.New(r.PostForm)
 	form.Required("name", "mobile")
-	form.MinLength("mobile", 13)
 	form.MobileNumberCheck("mobile", forms.NumberCheck)
 	form.MobileCountryCheckCode("mobile", forms.NumberValid)
 	form.MobileCheckPref("mobile")
@@ -314,8 +316,9 @@ func (app *application) UpdateContact(w http.ResponseWriter, r *http.Request) {
 
 	form := forms.New(r.PostForm)
 	form.Required("up_name", "up_contact", "up_id")
-	form.MinLength("up_contact", 10)
 	form.MobileNumberCheck("up_contact", forms.NumberCheck)
+	form.MobileCountryCheckCode("up_contact", forms.NumberValid)
+	form.MobileCheckPref("up_contact")
 
 	if !form.Valid() {
 		app.render(w, r, "update.page.tmpl", &templateData{Form: form})
