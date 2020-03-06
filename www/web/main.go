@@ -38,9 +38,9 @@ func main() {
 
 	config := new(models.Config)
 
-	flag.StringVar(&config.Addr, "addr", models.AddPort, "HTTP network address")
+	flag.StringVar(&config.Addr, "addr", ":7070", "HTTP network address")
 	flag.StringVar(&config.DSN, "dsn", models.Dsn, "MySQL data source name")
-	flag.StringVar(&config.Secret, "secret", models.SecretKey, "Secret key")
+	flag.StringVar(&config.Secret, "secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)

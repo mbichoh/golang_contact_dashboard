@@ -68,8 +68,8 @@ func (app *application) signup(w http.ResponseWriter, r *http.Request) {
 
 	// authentication
 
-	var username string = models.Username
-	var apikey string = models.ApiKey
+	var username string = ""
+	var apikey string = ""
 
 	// data
 
